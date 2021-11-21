@@ -4,6 +4,7 @@ import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 import styles from "../../styles/Home.module.css";
 import { IModalOptions, InputsSaveProgress } from '../../utils/Types'
+import { api } from "../../service";
 
 export default function ModalSaveProgress({ show, onClose, wps }: IModalOptions) {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -12,10 +13,12 @@ export default function ModalSaveProgress({ show, onClose, wps }: IModalOptions)
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<InputsSaveProgress>();
 
-  const onSubmitProgress: SubmitHandler<InputsSaveProgress> = data => {
-    console.log("data: ", data);
-  };
-  
+  const onSubmitProgress: SubmitHandler<InputsSaveProgress> = async data => {
+    const response = await api.post(`/ranking`, data);
+    console.log(response);
+    onCloseModal();
+  }
+
   useEffect(() => setValue("wps", wps), [setValue, wps]);
   useEffect(() => onOpenModal, [show]);
   useEffect(() => onCloseModal, [onClose]);

@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 import { IUserInfo } from '../../utils/Types';
-import { UserList } from '../../utils/Lists';
 
 export default function Ranking() {
-  const [userList, setUserList] = useState<IUserInfo[]>([]);
+  const [ranking, setRanking] = useState<IUserInfo[]>([]);
 
   useEffect(() => {
-    const userListSort = UserList.filter((user: IUserInfo) => user.wps > 0).sort((a, b) => b.wps - a.wps);
-    setUserList(userListSort);
-  }, [])
+    async function fetchRanking() {
+      const response = await fetch('/ranking');
+      const data = await response.json();
+      const sortData = data.filter((user: IUserInfo) => user.wps > 0).sort((a: { wps: number; }, b: { wps: number; }) => b.wps - a.wps);
+      setRanking(sortData);
+    }
+    fetchRanking();
+  }, [ranking]);
 
   return (
     <div className={styles.container}>
@@ -25,17 +29,27 @@ export default function Ranking() {
             </tr>
           </thead>
           <tbody>
-            {userList.map((user, index) => (
-              <tr key={index} className={styles.tableRow}>
-                <td>{index + 1}</td>
-                <td className={styles.name}>
-                  <Link href={`https://github.com/${user.name}`}>
-                    <a target="_blank">{user.name}</a>
-                  </Link>
-                </td>
-                <td>{user.wps}</td>
-              </tr>
-            ))}
+            <>
+              {ranking.length === 0 && (
+                <tr>
+                  <td colSpan={3}>
+                    <p>Nenhum registro</p>
+                  </td>
+                </tr>
+              )}
+
+              {ranking && ranking.map((user, index) => (
+                <tr key={index} className={styles.tableRow}>
+                  <td>{index + 1}</td>
+                  <td className={styles.name}>
+                    <Link href={`https://github.com/${user.name}`}>
+                      <a target="_blank">{user.name}</a>
+                    </Link>
+                  </td>
+                  <td>{user.wps}</td>
+                </tr>
+              ))}
+            </>
           </tbody>
         </table>
       </section>
